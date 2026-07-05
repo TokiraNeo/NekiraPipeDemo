@@ -2,12 +2,15 @@
 
 #include "MessageItem.hpp"
 #include <Windows.h>
+#include <atomic>
 #include <condition_variable>
+#include <deque>
+#include <functional>
 #include <memory>
 #include <mutex>
-#include <deque>
+#include <thread>
 #include <string>
-#include <functional>
+#include <vector>
 
 
 namespace NekiraPipeServer
@@ -17,7 +20,7 @@ class PipeSession
 {
 public:
     // 接收到信息回调
-    using ReceiveCallback = std::function<void(std::unique_ptr<IMessageItem>)>;
+    using ReceiveCallback = std::function<void(std::string message)>;
 
 private:
     HANDLE sendPipe;
@@ -34,6 +37,7 @@ private:
     std::deque<std::unique_ptr<IMessageItem>> messageQueue;
 
     std::atomic_bool isStopped;
+    HANDLE           stopEvent;
 
     // 线程池
     std::vector<std::thread> threads;
@@ -60,7 +64,10 @@ public:
     PipeSession(PipeSession&&) noexcept = delete;
     PipeSession& operator=(PipeSession&&) noexcept = delete;
 
-    inline void SetReceiveCallback(ReceiveCallback callback) { receiveCallback = std::move(callback); }
+    inline void SetReceiveCallback(ReceiveCallback callback)
+    {
+        receiveCallback = std::move(callback);
+    }
 
     void Start();
     void Stop();
