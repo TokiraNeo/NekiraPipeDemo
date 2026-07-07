@@ -137,10 +137,12 @@ void PipeSession::Stop()
     }
 }
 
-bool PipeSession::SendMessage(std::unique_ptr<IMessageItem> message, std::string& errMsg)
+bool PipeSession::ProductMessage(std::unique_ptr<IMessageItem> message, DWORD& errCode, std::string& errMsg)
 {
     if (!message)
     {
+        errCode = ERROR_INVALID_PARAMETER;
+        errMsg = "Message is null.";
         return false;
     }
 
@@ -151,6 +153,7 @@ bool PipeSession::SendMessage(std::unique_ptr<IMessageItem> message, std::string
         if (messageQueue.size() >= messageBufferSize)
         {
             // 队列已满，拒绝新的消息
+            errCode = ERROR_INVALID_STATE;
             errMsg = "Message Queue is full.";
             return false;
         }
@@ -163,11 +166,17 @@ bool PipeSession::SendMessage(std::unique_ptr<IMessageItem> message, std::string
     // 如果管道未连接，通知重试线程尝试重新连接
     if (!bIsConnected)
     {
+        errCode = ERROR_PIPE_NOT_CONNECTED;
         errMsg = "Send pipe is not connected. Notifying retry thread.";
         notifyRetryCond.notify_one();
     }
 
     return true;
+}
+
+bool PipeSession::IsRunning() const
+{
+    return !isStopped.load();
 }
 
 void PipeSession::ConsumerThread()

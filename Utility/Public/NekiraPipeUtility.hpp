@@ -1,6 +1,12 @@
 #pragma once
 
 #include <Windows.h>
+#include <string>
+
+namespace uuids
+{
+class uuid;
+} // namespace uuids
 
 namespace NekiraPipeUtility
 {
@@ -12,4 +18,10 @@ struct HandleCloser final
 DWORD GetPipeServerPid(const HANDLE& pipeHandle);
 
 DWORD GetPipeClientPid(const HANDLE& pipeHandle);
+
+uuids::uuid GenerateUUID();
+
+std::string GenerateUUIDString();
+
+
 } // namespace NekiraPipeUtility

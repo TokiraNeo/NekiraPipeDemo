@@ -72,7 +72,9 @@ public:
     void Start();
     void Stop();
 
-    bool SendMessage(std::unique_ptr<IMessageItem> message, std::string& errMsg);
+    bool ProductMessage(std::unique_ptr<IMessageItem> message, DWORD& errCode, std::string& errMsg);
+
+    bool IsRunning() const;
 
 private:
     void ConsumerThread();
