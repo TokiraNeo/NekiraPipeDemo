@@ -1,9 +1,35 @@
 #include "ServerApp.hpp"
 #include "NekiraPipeUtility.hpp"
 
+
 std::string NormalMessageItem::Serialize()
 {
-    return {};
+    Json jsonData;
+    jsonData["taskId"] = taskId;
+    jsonData["command"] = command;
+    jsonData["payload"] = payload;
+
+    return jsonData.dump();
+}
+
+void NormalMessageItem::Deserialize(const std::string& data)
+{
+    Json jsonData = Json::parse(data);
+
+    if (jsonData.contains("taskId") && jsonData["taskId"].is_string())
+    {
+        taskId = jsonData["taskId"].get<std::string>();
+    }
+
+    if (jsonData.contains("command") && jsonData["command"].is_string())
+    {
+        command = jsonData["command"].get<std::string>();
+    }
+
+    if (jsonData.contains("payload"))
+    {
+        payload = jsonData["payload"];
+    }
 }
 
 ServerApp::ServerApp(std::wstring sendPipe, std::wstring receivePipe, size_t msgBufferSize, size_t consumerCount)
@@ -27,8 +53,8 @@ void ServerApp::Stop()
     pipeSession.Stop();
 }
 
-bool ServerApp::AsyncRequestTask(std::string payload, IRequestTask::ResponseCallback callback, DWORD& errCode,
-                                 std::string& errMsg, std::chrono::seconds timeout)
+bool ServerApp::AsyncRequestTask(std::string command, Json payload, IRequestTask::ResponseCallback callback,
+                                 DWORD& errCode, std::string& errMsg, std::chrono::seconds timeout)
 {
     if (!pipeSession.IsRunning())
     {
@@ -55,6 +81,7 @@ bool ServerApp::AsyncRequestTask(std::string payload, IRequestTask::ResponseCall
 
     auto item = std::make_unique<NormalMessageItem>();
     item->taskId = uuid;
+    item->command = std::move(command);
     item->payload = std::move(payload);
 
     const auto result = pipeSession.ProductMessage(std::move(item), errCode, errMsg);

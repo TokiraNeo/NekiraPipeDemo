@@ -2,7 +2,10 @@
 
 #include "MessageItem.hpp"
 #include "PipeSession.hpp"
+#include "json.hpp"
 #include <unordered_map>
+
+using Json = nlohmann::json;
 
 using namespace NekiraPipeServer;
 
@@ -10,7 +13,8 @@ class NormalMessageItem final : public IMessageItem
 {
 public:
     IRequestTask::Type taskId;
-    std::string        payload;
+    std::string        command;
+    Json               payload;
 
     std::string Serialize() override;
     void        Deserialize(const std::string& data) override;
@@ -37,7 +41,7 @@ public:
     void Start();
     void Stop();
 
-    bool AsyncRequestTask(std::string payload, IRequestTask::ResponseCallback callback, DWORD& errCode,
+    bool AsyncRequestTask(std::string command, Json payload, IRequestTask::ResponseCallback callback, DWORD& errCode,
                           std::string& errMsg, std::chrono::seconds timeout = std::chrono::seconds(3));
 
 private:
