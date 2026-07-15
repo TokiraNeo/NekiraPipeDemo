@@ -9,14 +9,7 @@
 
 namespace NekiraPipeServer
 {
-class IMessageItem
-{
-public:
-    virtual ~IMessageItem() = default;
-    virtual std::string Serialize();
-    virtual void        Deserialize(const std::string& data);
-};
-
+class IMessageItem;
 class IRequestTask
 {
 public:
@@ -71,4 +64,48 @@ private:
 
     std::atomic_bool isCompleted;
 };
+
+class IMessageItem
+{
+public:
+    IRequestTask::Type taskId;
+
+    virtual ~IMessageItem() = default;
+    virtual std::string Serialize();
+    virtual void        Deserialize(const std::string& data);
+};
+
+class RequestWaiter final
+{
+private:
+    HANDLE eventHandle;
+    bool   bSuccessed;
+
+    std::unique_ptr<IMessageItem> messageItem;
+    DWORD                         errorCode;
+    std::string                   errorMessage;
+
+public:
+    RequestWaiter();
+    ~RequestWaiter();
+
+    RequestWaiter(const RequestWaiter&) = delete;
+    RequestWaiter& operator=(const RequestWaiter&) = delete;
+
+    RequestWaiter(RequestWaiter&&) noexcept = delete;
+    RequestWaiter& operator=(RequestWaiter&&) noexcept = delete;
+
+    void OnRequestResponse(std::unique_ptr<IMessageItem> message, DWORD errCode, std::string errMsg);
+
+    void Wait();
+
+    bool IsSuccessed() const;
+
+    IMessageItem* GetMessageItem() const;
+
+    DWORD GetErrorCode() const;
+
+    std::string GetErrorMessage() const;
+};
+
 } // namespace NekiraPipeServer

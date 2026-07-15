@@ -12,9 +12,8 @@ using namespace NekiraPipeServer;
 class NormalMessageItem final : public IMessageItem
 {
 public:
-    IRequestTask::Type taskId;
-    std::string        command;
-    Json               payload;
+    std::string command;
+    Json        payload;
 
     std::string Serialize() override;
     void        Deserialize(const std::string& data) override;

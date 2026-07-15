@@ -23,5 +23,5 @@ uuids::uuid GenerateUUID();
 
 std::string GenerateUUIDString();
 
-
+std::wstring UTF8ToWString(const std::string& str);
 } // namespace NekiraPipeUtility

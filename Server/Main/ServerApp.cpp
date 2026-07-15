@@ -156,8 +156,17 @@ void ServerApp::OnReceiveMessage(std::string message)
 void ServerApp::OnTaskTimeout(IRequestTask::Type taskId)
 {
     auto task = PopTaskById(taskId);
+    if (!task)
+    {
+        return;
+    }
 
-    CompleteTask(std::move(task), {}, ERROR_TIMEOUT, "Task timed out.");
+    auto message = std::make_unique<NormalMessageItem>();
+    message->taskId = taskId;
+    message->command = "";
+    message->payload = Json::object();
+
+    CompleteTask(std::move(task), std::move(message), ERROR_TIMEOUT, "Task timed out.");
 }
 
 void ServerApp::CompleteTask(std::unique_ptr<IRequestTask> task, std::unique_ptr<IMessageItem> message, DWORD errCode,

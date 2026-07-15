@@ -63,4 +63,43 @@ std::string GenerateUUIDString()
     return uuids::to_string(id);
 }
 
+std::wstring UTF8ToWString(const std::string& str)
+{
+    if (str.empty())
+    {
+        return std::wstring();
+    }
+
+    auto expected = MultiByteToWideChar(
+        CP_UTF8,
+        0,
+        str.data(),
+        str.size(),
+        nullptr,
+        0
+    );
+
+    if (expected == 0)
+    {
+        return std::wstring();
+    }
+
+    std::vector<wchar_t> buffer(expected, '\0');
+    auto coverted = MultiByteToWideChar(
+        CP_UTF8,
+        0,
+        str.data(),
+        str.size(),
+        buffer.data(),
+        expected
+    );
+
+    if (coverted != expected)
+    {
+        return std::wstring();
+    }
+
+    return std::wstring(buffer.data(), coverted);
+}
+
 } // namespace NekiraPipeUtility

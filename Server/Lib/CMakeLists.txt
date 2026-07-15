@@ -7,6 +7,7 @@ set(HEADER
 
 set(SOURCE
     Private/PipeSession.cpp
+    Private/MessageItem.cpp
 )
 
 add_library(NekiraPipeServerLib SHARED ${HEADER} ${SOURCE})
